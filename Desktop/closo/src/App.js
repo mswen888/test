@@ -111,7 +111,7 @@ function App() {
     setMarginLeft(Number.parseInt(ml.replace("px", "")));
   };
 
-  useLayoutEffect(() => {
+  const windowOnResizeListenerHandler = () => {
     window.addEventListener("resize", () => {
       retrieveMargin();
     });
@@ -120,7 +120,15 @@ function App() {
         retrieveMargin();
       });
     };
+  }
+
+  useLayoutEffect(() => {
+    windowOnResizeListenerHandler()
   }, []);
+
+  useEffect(() => {
+    retrieveMargin()
+  },[])
 
   const offset = (paddingLeft + marginLeft) / 16;
 
