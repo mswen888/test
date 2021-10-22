@@ -2,10 +2,10 @@ import logo from "./logo.svg";
 import "./App.css";
 import { Splide, SplideSlide } from "@splidejs/react-splide";
 import "@splidejs/splide/dist/css/splide.min.css";
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect, useLayoutEffect } from "react";
 import "./index.css";
 
-function ManualCarousel() {
+function ManualCarousel({ offset }) {
   return (
     <div className="App">
       <Splide
@@ -16,7 +16,15 @@ function ManualCarousel() {
           perMove: 3,
           gap: "1rem",
           pagination: false,
-          padding: "5rem",
+          padding: `${offset}rem`,
+          breakpoints: {
+              640: {
+                type: 'loop',
+                perMove: 1,
+                padding: '2rem',
+                perPage: 1,
+              }
+          },
         }}
         renderControls={() => (
           <div className="absolute flex w-4 h-4 space-x-6 splide__arrows -top-8 right-12 invisible sm:visible">
@@ -79,29 +87,55 @@ function ManualCarousel() {
 }
 
 function App() {
+  const screenSize = useRef(null);
+  const elementRef = useRef(null);
+
   const [marginLeft, setMarginLeft] = useState(0);
   const [paddingLeft, setPaddingLeft] = useState(0);
 
-  const retrieveMargin = (elm) => {
-    if (elm != null) {
-      let styles = window.getComputedStyle(elm);
-      let ml = styles.getPropertyValue("margin-left");
-      setMarginLeft(Number.parseInt(ml.replace("px", "")));
+  // const retrieveMargin = (elm) => {
+  //   if (elm != null) {
+  //     let styles = window.getComputedStyle(elm);
+  //     let ml = styles.getPropertyValue("margin-left");
+  //     setMarginLeft(Number.parseInt(ml.replace("px", "")));
 
-      let pl = styles.getPropertyValue("padding-left");
-      setPaddingLeft(Number.parseInt(pl.replace("px", "")));
-    }
-  }
+  //     let pl = styles.getPropertyValue("padding-left");
+  //     setPaddingLeft(Number.parseInt(pl.replace("px", "")));
+  //   }
+  // }
+  const retrieveMargin = () => {
+    const styles = window.getComputedStyle(elementRef.current);
+    const ml = styles.getPropertyValue("margin-left");
+    let pl = styles.getPropertyValue("padding-left");
+    setPaddingLeft(Number.parseInt(pl.replace("px", "")));
+    setMarginLeft(Number.parseInt(ml.replace("px", "")));
+  };
 
-  console.log(paddingLeft+marginLeft);
+  useLayoutEffect(() => {
+    window.addEventListener("resize", () => {
+      retrieveMargin();
+    });
+    return () => {
+      window.removeEventListener("resize", () => {
+        retrieveMargin();
+      });
+    };
+  }, []);
+
+  const offset = (paddingLeft + marginLeft) / 16;
+
+  console.log("OFFSET", offset);
 
   return (
-    <div className="max-w-6xl mx-auto p-4 pt-6" ref={retrieveMargin}>
-      <h2 className=" px-4 s-top-8 pb-4 text-lg font-bold ml-5 sm:ml-0">
+    <div className=" p-4 pt-6">
+      <h2
+        className="max-w-6xl mx-auto px-4 s-top-8 pb-4 text-lg font-bold"
+        ref={elementRef}
+      >
         This is the title
       </h2>
 
-      <ManualCarousel />
+      <ManualCarousel offset={offset} />
     </div>
   );
 }
