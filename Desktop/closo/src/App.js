@@ -5,7 +5,8 @@ import "@splidejs/splide/dist/css/splide.min.css";
 import React, { useState, useRef, useEffect, useLayoutEffect } from "react";
 import "./index.css";
 
-function ManualCarousel({ offset }) {
+function ManualCarousel({ offset })
+{
   return (
     <div className="App">
       <Splide
@@ -18,12 +19,12 @@ function ManualCarousel({ offset }) {
           pagination: false,
           padding: `${offset}rem`,
           breakpoints: {
-              640: {
-                type: 'loop',
-                perMove: 1,
-                padding: '2rem',
-                perPage: 1,
-              }
+            640: {
+              type: 'loop',
+              perMove: 1,
+              padding: '2rem',
+              perPage: 1,
+            }
           },
         }}
         renderControls={() => (
@@ -86,12 +87,14 @@ function ManualCarousel({ offset }) {
   );
 }
 
-function App() {
+function App()
+{
   const screenSize = useRef(null);
   const elementRef = useRef(null);
 
   const [marginLeft, setMarginLeft] = useState(0);
   const [paddingLeft, setPaddingLeft] = useState(0);
+  const [loaded, setLoaded] = useState(false)
 
   // const retrieveMargin = (elm) => {
   //   if (elm != null) {
@@ -103,33 +106,49 @@ function App() {
   //     setPaddingLeft(Number.parseInt(pl.replace("px", "")));
   //   }
   // }
-  const retrieveMargin = () => {
+  const retrieveMargin = (firstTime) =>
+  {
     const styles = window.getComputedStyle(elementRef.current);
     const ml = styles.getPropertyValue("margin-left");
     let pl = styles.getPropertyValue("padding-left");
     setPaddingLeft(Number.parseInt(pl.replace("px", "")));
     setMarginLeft(Number.parseInt(ml.replace("px", "")));
+    if (firstTime) setLoaded(true)
   };
 
-  useLayoutEffect(() => {
-    window.addEventListener("resize", () => {
+  const windowOnResizeListenerHandler = () =>
+  {
+    window.addEventListener("resize", () =>
+    {
       retrieveMargin();
     });
-    return () => {
-      window.removeEventListener("resize", () => {
+    return () =>
+    {
+      window.removeEventListener("resize", () =>
+      {
         retrieveMargin();
       });
     };
+  }
+
+  useLayoutEffect(() =>
+  {
+    windowOnResizeListenerHandler()
   }, []);
+
+  useEffect(() =>
+  {
+    retrieveMargin(true)
+  }, [])
 
   const offset = (paddingLeft + marginLeft) / 16;
 
   console.log("OFFSET", offset);
 
   return (
-    <div className=" p-4 pt-6">
+    <div className={`${loaded ? 'opacity-100' : 'opacity-0'} p-4 pt-6`}>
       <h2
-        className="max-w-6xl mx-auto px-4 s-top-8 pb-4 text-lg font-bold"
+        className='max-w-6xl mx-auto px-4 s-top-8 pb-4 text-lg font-bold'
         ref={elementRef}
       >
         This is the title
